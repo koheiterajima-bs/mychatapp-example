@@ -17,3 +17,12 @@ samples, guidance on mobile development, and a full API reference.
 
 ## 参考サイト
 [Firebaseを使ったアプリ概要](https://www.flutter-study.dev/firebase-app/about-firebase-app)
+
+## 学んだこと
+- StatefulWidgetとStateだと何が不便か
+  - 様々なWidgetが組み合わさったUIになり、状態が複雑になってしまうと管理しきれなくなってしまう
+- Providerを使うと何がよいか
+  - 親Widgetから子Widgetにデータを受け渡すことができる、データを渡す先は子WidgetであればどこでもOK
+- Providerによるデータの受け渡し方法
+  - 親WidgetでProvider<T>.value()を使いデータを渡す
+  - 子WidgetでProvider<T>()を使いデータを受け取る

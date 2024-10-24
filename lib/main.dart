@@ -3,34 +3,43 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
+import 'package:provider/provider.dart';
 
-Future<void> main() async {
-  // Flutterアプリケーションが実行される前にウィジェットバインディングを初期化
-  WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    print("Firebaseの初期化に失敗しました: $e");
+// 更新可能なデータ(Providerを使って状態管理を行う)
+class UserState extends ChangeNotifier {
+  User? user;
+
+  void setUser(User newUser) {
+    user = newUser;
+    // このオブジェクトに登録されているすべてのリスナーに通知される
+    notifyListeners();
   }
+}
 
+void main() {
+  // 最初に表示するWidget
   runApp(ChatApp());
 }
 
 class ChatApp extends StatelessWidget {
+  // ユーザーの情報を管理するデータ
+  final UserState userState = UserState();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      // アプリ名
-      title: 'ChatApp',
-      theme: ThemeData(
-        // テーマカラー
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider<UserState>(
+      create: (context) => UserState(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        // アプリ名
+        title: 'ChatApp',
+        theme: ThemeData(
+          // テーマカラー
+          primarySwatch: Colors.blue,
+        ),
+        // ログイン画面を表示
+        home: LoginPage(),
       ),
-      // ログイン画面を表示
-      home: LoginPage(),
     );
   }
 }
@@ -49,6 +58,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -82,15 +94,17 @@ class _LoginPageState extends State<LoginPage> {
                     final FirebaseAuth auth = FirebaseAuth.instance;
                     final result = await auth.createUserWithEmailAndPassword(
                         email: newUserEmail, password: newUserPassword);
+                    // ユーザー情報を更新
+                    userState.setUser(result.user!);
                     // チャット画面に推移
                     await Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) {
                         // !はnullでないことを示している
-                        return ChatPage(result.user!);
+                        return ChatPage();
                       }),
                     );
                   } catch (e) {
-                    Text('ユーザー登録に失敗しました');
+                    Text('ユーザー登録に失敗しました: $e');
                   }
                 }),
             const SizedBox(height: 10),
@@ -104,11 +118,13 @@ class _LoginPageState extends State<LoginPage> {
                     email: newUserEmail,
                     password: newUserPassword,
                   );
+                  // ユーザー情報を更新
+                  userState.setUser(result.user!);
                   // チャット画面に推移
                   await Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) {
                       // !はnullでないことを示している
-                      return ChatPage(result.user!);
+                      return ChatPage();
                     }),
                   );
                 } catch (e) {
@@ -126,13 +142,14 @@ class _LoginPageState extends State<LoginPage> {
 
 // チャット画面用Widget
 class ChatPage extends StatelessWidget {
-  // 引数からユーザー情報を受け取れるようにする
-  ChatPage(this.user);
-  // ユーザー情報
-  final User user;
+  ChatPage();
 
   @override
   Widget build(BuildContext context) {
+    // ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
+    final User user = userState.user!;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('チャット'),
