@@ -107,7 +107,10 @@ class _LoginPageState extends State<LoginPage> {
                       }),
                     );
                   } catch (e) {
-                    Text('ユーザー登録に失敗しました: $e');
+                    // Text('ユーザー登録に失敗しました: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('ユーザー登録に失敗しました: $e')),
+                    );
                   }
                 }),
             const SizedBox(height: 10),
