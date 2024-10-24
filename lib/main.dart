@@ -16,8 +16,17 @@ class UserState extends ChangeNotifier {
   }
 }
 
-void main() {
-  // 最初に表示するWidget
+Future<void> main() async {
+  // Flutterアプリケーションが実行される前にウィジェットバインディングを初期化
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("Firebaseの初期化に失敗しました: $e");
+  }
+
   runApp(ChatApp());
 }
 
