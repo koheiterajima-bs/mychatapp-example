@@ -96,6 +96,9 @@ class _LoginPageState extends State<LoginPage> {
                         email: newUserEmail, password: newUserPassword);
                     // ユーザー情報を更新
                     userState.setUser(result.user!);
+
+                    // 少し遅延を挟む
+                    await Future.delayed(Duration(milliseconds: 1000));
                     // チャット画面に推移
                     await Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) {
